@@ -23,25 +23,31 @@ package
       
       public static const MOD_NAME:String = "CustomRadios";
       
-      public static const MOD_VERSION:String = "1.0.1";
+      public static const MOD_VERSION:String = "1.0.2";
       
       public static const FULL_MOD_NAME:String = MOD_NAME + " " + MOD_VERSION;
       
       public static const CONFIG_FILE:String = "../CustomRadios.json";
       
-      public static const CONFIG_RELOAD_TIME:uint = 10200;
+      public static const CONFIG_RELOAD_TIME:uint = 11000;
       
       private static const STRING_NUMBER_OF_TRACKS:String = "{numberOfTracks}";
       
       private static const STRING_RADIO_NAME:String = "{radioName}";
       
+      private static const STRING_NEXT_RADIO_NAME:String = "{nextRadioName}";
+      
       private static const STRING_TRACK_ID:String = "{trackId}";
       
       private static const STRING_TRACK_NAME:String = "{trackName}";
       
+      private static const STRING_NEXT_TRACK_NAME:String = "{nextTrackName}";
+      
       private static const STRING_TRACK_DURATION:String = "{trackDuration}";
       
       private static const STRING_ELAPSED_DURATION:String = "{elapsedDuration}";
+      
+      private static const STRING_HOTKEY:String = "{hotkey}";
       
       private static const TITLE_HUDMENU:String = "HUDMenu";
        
@@ -49,6 +55,8 @@ package
       private var lastRenderTime:Number = 0;
       
       private var topLevel:* = null;
+      
+      private var isHudMenu:Boolean = false;
       
       private var dummy_tf:TextField;
       
@@ -80,9 +88,20 @@ package
       
       private var currentRadioId:int = 0;
       
+      private var skipSongs:int = 0;
+      
+      private var nextSongId:int = -1;
+      
+      private var radioButtons:Array;
+      
+      private const buttonActions:Array = CustomRadiosConfig.BUTTON_ACTIONS;
+      
+      private var refreshButtons:Boolean = false;
+      
       public function CustomRadios()
       {
          arrTextfields = [];
+         radioButtons = [];
          super();
          addEventListener(Event.ADDED_TO_STAGE,this.addedToStageHandler);
          this.HUDModeData = BSUIDataManager.GetDataFromClient("HUDModeData");
@@ -104,15 +123,136 @@ package
       public function addedToStageHandler(param1:Event) : *
       {
          var movieRoot:* = stage.getChildAt(0);
-         if(Boolean(movieRoot) && getQualifiedClassName(movieRoot) == TITLE_HUDMENU)
+         if(Boolean(movieRoot))
          {
             this.topLevel = movieRoot;
-            trace(MOD_NAME + " added to stage: " + getQualifiedClassName(movieRoot));
+            if(getQualifiedClassName(this.topLevel) == "HUDMenu")
+            {
+               this.isHudMenu = true;
+            }
+            else if(this.topLevel.numChildren > 0)
+            {
+               if(getQualifiedClassName(this.topLevel.getChildAt(0)) == "OverlayMenu")
+               {
+                  this.topLevel = this.topLevel.getChildAt(0);
+                  this.isHudMenu = false;
+                  stage.addEventListener(KeyboardEvent.KEY_DOWN,this.keyDownHandler);
+               }
+            }
+            trace(MOD_NAME + " added to stage: " + getQualifiedClassName(this.topLevel));
          }
          else
          {
             trace(MOD_NAME + " not added to stage: " + getQualifiedClassName(movieRoot));
             ShowHUDMessage("Not added to stage: " + getQualifiedClassName(movieRoot));
+         }
+      }
+      
+      public function keyDownHandler(event:Event) : void
+      {
+         if(!config)
+         {
+            return;
+         }
+         if(config.debugKeys)
+         {
+            displayMessage("keyDown: " + event.keyCode);
+         }
+         if(config.Hotkeys)
+         {
+            if(event.keyCode == config.Hotkeys.playStop)
+            {
+               config.Play = !config.Play;
+               if(config.Play)
+               {
+                  startRadio();
+               }
+            }
+            if(event.keyCode == config.Hotkeys.prevRadio)
+            {
+               config.PlayRadioId--;
+               if(config.PlayRadioId < 0)
+               {
+                  config.PlayRadioId = config.Radios.length - 1;
+               }
+            }
+            if(event.keyCode == config.Hotkeys.nextRadio)
+            {
+               config.PlayRadioId++;
+               if(config.PlayRadioId >= config.Radios.length)
+               {
+                  config.PlayRadioId = 0;
+               }
+            }
+            if(event.keyCode == config.Hotkeys.prevSong)
+            {
+               skipSongs--;
+               queueNextSong();
+            }
+            if(event.keyCode == config.Hotkeys.nextSong)
+            {
+               skipSongs++;
+               queueNextSong();
+            }
+         }
+      }
+      
+      private function radioButtonClickHandler(param1:MouseEvent) : *
+      {
+         var buttonId:Number = -1;
+         if((buttonId = Number(this.radioButtons.indexOf(param1.target))) != -1)
+         {
+            switch(buttonId)
+            {
+               case 0:
+                  skipSongs--;
+                  queueNextSong();
+                  break;
+               case 1:
+                  config.Play = !config.Play;
+                  startRadio();
+                  break;
+               case 2:
+                  skipSongs++;
+                  queueNextSong();
+                  break;
+               case 3:
+                  config.PlayRadioId--;
+                  if(config.PlayRadioId < 0)
+                  {
+                     config.PlayRadioId = config.Radios.length - 1;
+                  }
+                  break;
+               case 4:
+                  config.PlayRadioId++;
+                  if(config.PlayRadioId >= config.Radios.length)
+                  {
+                     config.PlayRadioId = 0;
+                  }
+            }
+         }
+      }
+      
+      public function queueNextSong() : void
+      {
+         if(skipSongs != 0)
+         {
+            if(currentRadio != null && currentRadio.playlist != null && currentRadio.playlist.length != 0)
+            {
+               if(currentRadio.order == "RANDOM")
+               {
+                  nextSongId = Math.floor(Math.random() * currentRadio.playlist.length);
+               }
+               else
+               {
+                  nextSongId = (nextSongId + skipSongs) % currentRadio.playlist.length;
+                  if(nextSongId < 0)
+                  {
+                     nextSongId = currentRadio.playlist.length - 1;
+                  }
+               }
+            }
+            skipSongs = 0;
          }
       }
       
@@ -143,11 +283,12 @@ package
                      {
                         startRadio();
                      }
+                     displayRadioButtons();
                   }
                }
                catch(e:Error)
                {
-                  ShowHUDMessage("Error loading config: " + e);
+                  ShowHUDMessage("Error loading config (" + CustomRadiosConfig.ERROR_CODE + "): " + e);
                }
             };
             url = new URLRequest(CONFIG_FILE);
@@ -159,6 +300,79 @@ package
          {
             ShowHUDMessage("Error loading config: " + e);
          }
+      }
+      
+      private function displayRadioButtons() : *
+      {
+         var i:int = 0;
+         var textfield:TextField = null;
+         var textformat:TextFormat = null;
+         try
+         {
+            if(radioButtons.length == 5)
+            {
+               this.refreshButtons = true;
+               return;
+            }
+            i = 0;
+            while(i < 5)
+            {
+               textfield = new TextField();
+               textfield.addEventListener(MouseEvent.CLICK,radioButtonClickHandler);
+               TextFieldEx.setTextAutoSize(textfield,TextFieldEx.TEXTAUTOSZ_FIT);
+               addChild(textfield);
+               textformat = new TextFormat(config.textFont,16,config.textColor);
+               textformat.align = "center";
+               textfield.background = true;
+               textfield.border = true;
+               textfield.selectable = false;
+               textfield.defaultTextFormat = textformat;
+               textfield.setTextFormat(textformat);
+               textfield.visible = false;
+               this.radioButtons.push(textfield);
+               this.applyRadioButtonStyle(i);
+               i++;
+            }
+         }
+         catch(e:Error)
+         {
+            ShowHUDMessage("displayRadioButtons: " + e);
+            displayMessage("displayRadioButtons: " + e);
+         }
+      }
+      
+      private function applyRadioButtonStyle(id:int) : void
+      {
+         if(id < 0 || id >= this.radioButtons.length)
+         {
+            return;
+         }
+         var textfield:TextField = this.radioButtons[id];
+         GlobalFunc.SetText(textfield,config.ButtonNames[id].replace(STRING_HOTKEY,getRadioKey(id)),false);
+         textfield.backgroundColor = config.backgroundColor;
+         textfield.borderColor = config.textColor;
+         textfield.textColor = config.textColor;
+         if(id < 3)
+         {
+            var w:Number = config.Buttons.width / 3;
+            textfield.width = w;
+            textfield.height = config.Buttons.height / 2;
+            textfield.x = config.Buttons.x + id * w;
+            textfield.y = config.Buttons.y + textfield.height;
+         }
+         else
+         {
+            w = config.Buttons.width / 2;
+            textfield.width = config.Buttons.width / 2;
+            textfield.height = config.Buttons.height / 2;
+            textfield.x = config.Buttons.x + (id - 3) * w;
+            textfield.y = config.Buttons.y;
+         }
+      }
+      
+      private function getRadioKey(keyId:int) : String
+      {
+         return Buttons.getButtonKey(config.Hotkeys[buttonActions[keyId]]);
       }
       
       private function initTextField() : void
@@ -334,7 +548,7 @@ package
       
       public function startRadio() : void
       {
-         if(!config.Play || currentRadio != null)
+         if(!config || !config.Play || currentRadio != null)
          {
             return;
          }
@@ -348,11 +562,12 @@ package
       
       public function nextSong() : void
       {
-         if(!config.Play)
+         if(!config || !config.Play)
          {
             currentRadio = null;
             currentSong = null;
             currentSongId = 0;
+            nextSongId = -1;
             return;
          }
          if(!currentRadio || currentRadioId != config.PlayRadioId)
@@ -386,19 +601,47 @@ package
             {
                currentSongId = 0;
             }
+            if(currentRadio.order == "RANDOM")
+            {
+               nextSongId = Math.floor(Math.random() * currentRadio.playlist.length);
+               while(currentSongId == nextSongId)
+               {
+                  nextSongId = Math.floor(Math.random() * currentRadio.playlist.length);
+               }
+            }
+            else
+            {
+               nextSongId = (currentSongId + 1) % currentRadio.playlist.length;
+            }
          }
          else if(currentRadio.order == "RANDOM")
          {
             var prevSongId:int = currentSongId;
-            currentSongId = Math.floor(Math.random() * currentRadio.playlist.length);
-            if(currentSongId == prevSongId)
+            if(nextSongId == -1)
             {
                currentSongId = Math.floor(Math.random() * currentRadio.playlist.length);
+            }
+            else
+            {
+               currentSongId = nextSongId;
+            }
+            nextSongId = Math.floor(Math.random() * currentRadio.playlist.length);
+            while(currentSongId == nextSongId)
+            {
+               nextSongId = Math.floor(Math.random() * currentRadio.playlist.length);
             }
          }
          else
          {
-            currentSongId = (currentSongId + 1) % currentRadio.playlist.length;
+            if(nextSongId == -1)
+            {
+               currentSongId = (currentSongId + 1) % currentRadio.playlist.length;
+            }
+            else
+            {
+               currentSongId = nextSongId % currentRadio.playlist.length;
+            }
+            nextSongId = (currentSongId + 1) % currentRadio.playlist.length;
          }
          currentSong = currentRadio.playlist[currentSongId];
          GlobalFunc.PlayMenuSound(currentSong.id);
@@ -409,27 +652,70 @@ package
       public function displayRadioWidget() : void
       {
          var t1:Number;
+         var vis:Boolean;
+         var i:int;
+         var parts:Array;
+         var isValidHM:Boolean;
          try
          {
             t1 = Number(getTimer());
-            this.visible = this.isValidHUDMode();
-            if(!this.visible)
+            isValidHM = this.isValidHUDMode();
+            if(!this.isHudMenu && this.topLevel != null && this.topLevel.SocialMenu_mc != null)
+            {
+               vis = Boolean(this.topLevel.SocialMenu_mc.show);
+               i = 0;
+               if(refreshButtons)
+               {
+                  while(i < this.radioButtons.length)
+                  {
+                     this.radioButtons[i].visible = vis;
+                     applyRadioButtonStyle(i);
+                     i++;
+                  }
+                  refreshButtons = false;
+               }
+               else
+               {
+                  while(i < this.radioButtons.length)
+                  {
+                     this.radioButtons[i].visible = vis;
+                     i++;
+                  }
+               }
+            }
+            this.resetMessages();
+            if(!isValidHM)
             {
                return;
             }
-            this.resetMessages();
             if(config.debug)
             {
                displayMessage(FULL_MOD_NAME);
                applyColor(config.textColorError);
-               displayMessage("HUDMode: " + this.HUDModeData.data.hudMode);
+               displayMessage("HUDMode: " + this.HUDModeData.data.hudMode + " " + (isHudMenu ? "(HUD)" : "(Overlay)"));
                applyColor(config.textColorError);
                displayMessage("RenderTime: " + this.lastRenderTime + "ms");
                applyColor(config.textColorError);
+               displayMessage("topLevel: " + this.topLevel);
+               if(this.topLevel)
+               {
+                  displayMessage("SocialMenu_mc: " + this.topLevel.SocialMenu_mc);
+                  if(this.topLevel.SocialMenu_mc)
+                  {
+                     displayMessage("show: " + this.topLevel.SocialMenu_mc.show);
+                  }
+               }
+               displayMessage("radioButtons: " + this.radioButtons.length);
             }
             if(currentRadio && currentSong)
             {
-               displayMessage(config.Format.replace(STRING_RADIO_NAME,currentRadio.name).replace(STRING_NUMBER_OF_TRACKS,currentRadio.playlist.length).replace(STRING_TRACK_ID,currentSongId + 1).replace(STRING_TRACK_NAME,currentSong.name).replace(STRING_TRACK_DURATION,GlobalFunc.FormatTimeString(currentSong.duration)).replace(STRING_ELAPSED_DURATION,GlobalFunc.FormatTimeString(this.elapsedTime - currentSongPlayTimestamp) || "0:00"));
+               parts = config.Format.replace(STRING_RADIO_NAME,currentRadio.name).replace(STRING_NUMBER_OF_TRACKS,currentRadio.playlist.length).replace(STRING_TRACK_ID,currentSongId + 1).replace(STRING_TRACK_NAME,currentSong.name).replace(STRING_NEXT_TRACK_NAME,nextSongId >= 0 && nextSongId < currentRadio.playlist.length ? currentRadio.playlist[nextSongId].name : "...").replace(STRING_TRACK_DURATION,GlobalFunc.FormatTimeString(currentSong.duration)).replace(STRING_ELAPSED_DURATION,GlobalFunc.FormatTimeString(this.elapsedTime - currentSongPlayTimestamp) || "0:00").split("\n");
+               i = 0;
+               while(i < parts.length)
+               {
+                  displayMessage(parts[i]);
+                  i++;
+               }
             }
             if(!config.Play)
             {
@@ -456,7 +742,7 @@ package
             }
             else if(currentRadioId != config.PlayRadioId)
             {
-               displayMessage(config.FormatRadioSwitching);
+               displayMessage(config.FormatRadioSwitching.replace(STRING_NEXT_RADIO_NAME,config.Radios[config.PlayRadioId].name));
                applyColor(config.textColorError);
             }
             drawBackground();
