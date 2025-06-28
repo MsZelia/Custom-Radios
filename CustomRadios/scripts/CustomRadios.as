@@ -23,7 +23,7 @@ package
       
       public static const MOD_NAME:String = "CustomRadios";
       
-      public static const MOD_VERSION:String = "1.0.2";
+      public static const MOD_VERSION:String = "1.0.3";
       
       public static const FULL_MOD_NAME:String = MOD_NAME + " " + MOD_VERSION;
       
@@ -50,6 +50,8 @@ package
       private static const STRING_HOTKEY:String = "{hotkey}";
       
       private static const TITLE_HUDMENU:String = "HUDMenu";
+      
+      private static const MAIN_MENU:String = "MainMenu";
        
       
       private var lastRenderTime:Number = 0;
@@ -98,6 +100,12 @@ package
       
       private var refreshButtons:Boolean = false;
       
+      private var isInMainMenu:Boolean = true;
+      
+      private var lastHUDMode:String = "";
+      
+      private var nextSongUID:uint;
+      
       public function CustomRadios()
       {
          arrTextfields = [];
@@ -136,6 +144,8 @@ package
                {
                   this.topLevel = this.topLevel.getChildAt(0);
                   this.isHudMenu = false;
+                  this.isInMainMenu = true;
+                  BSUIDataManager.Subscribe("MenuStackData",this.updateIsMainMenu);
                   stage.addEventListener(KeyboardEvent.KEY_DOWN,this.keyDownHandler);
                }
             }
@@ -145,6 +155,18 @@ package
          {
             trace(MOD_NAME + " not added to stage: " + getQualifiedClassName(movieRoot));
             ShowHUDMessage("Not added to stage: " + getQualifiedClassName(movieRoot));
+         }
+      }
+      
+      private function updateIsMainMenu(event:FromClientDataEvent) : void
+      {
+         this.isInMainMenu = event.data && event.data.menuStackA && event.data.menuStackA.some(function(x:*):*
+         {
+            return x.menuName == MAIN_MENU;
+         });
+         if(this.isInMainMenu)
+         {
+            this.lastHUDMode = this.HUDModeData.data.hudMode;
          }
       }
       
@@ -646,7 +668,7 @@ package
          currentSong = currentRadio.playlist[currentSongId];
          GlobalFunc.PlayMenuSound(currentSong.id);
          currentSongPlayTimestamp = this.elapsedTime;
-         setTimeout(nextSong,1000 * currentSong.duration);
+         nextSongUID = setTimeout(nextSong,1000 * currentSong.duration);
       }
       
       public function displayRadioWidget() : void
@@ -659,6 +681,12 @@ package
          try
          {
             t1 = Number(getTimer());
+            if(this.isInMainMenu && this.lastHUDMode == "Loading")
+            {
+               clearTimeout(nextSongUID);
+               this.lastHUDMode = "";
+               nextSongUID = setTimeout(nextSong,2000);
+            }
             isValidHM = this.isValidHUDMode();
             if(!this.isHudMenu && this.topLevel != null && this.topLevel.SocialMenu_mc != null)
             {
@@ -692,7 +720,7 @@ package
             {
                displayMessage(FULL_MOD_NAME);
                applyColor(config.textColorError);
-               displayMessage("HUDMode: " + this.HUDModeData.data.hudMode + " " + (isHudMenu ? "(HUD)" : "(Overlay)"));
+               displayMessage("HUDMode: " + (this.isInMainMenu ? MAIN_MENU : this.HUDModeData.data.hudMode) + " " + (isHudMenu ? "(HUD)" : "(Overlay)"));
                applyColor(config.textColorError);
                displayMessage("RenderTime: " + this.lastRenderTime + "ms");
                applyColor(config.textColorError);
@@ -761,9 +789,9 @@ package
          {
             if(config.HUDModesState == CustomRadiosConfig.STATE_HIDDEN)
             {
-               return config.HUDModes.indexOf(this.HUDModeData.data.hudMode) == -1;
+               return this.isInMainMenu ? config.HUDModes.indexOf(MAIN_MENU) == -1 : config.HUDModes.indexOf(this.HUDModeData.data.hudMode) == -1;
             }
-            return config.HUDModes.indexOf(this.HUDModeData.data.hudMode) != -1;
+            return this.isInMainMenu ? config.HUDModes.indexOf(MAIN_MENU) != -1 : config.HUDModes.indexOf(this.HUDModeData.data.hudMode) != -1;
          }
          return true;
       }
