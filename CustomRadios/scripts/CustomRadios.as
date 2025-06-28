@@ -51,6 +51,8 @@ package
       
       private static const TITLE_HUDMENU:String = "HUDMenu";
       
+      private static const TITLE_OVERLAY:String = "OverlayMenu";
+      
       private static const MAIN_MENU:String = "MainMenu";
        
       
@@ -134,13 +136,13 @@ package
          if(Boolean(movieRoot))
          {
             this.topLevel = movieRoot;
-            if(getQualifiedClassName(this.topLevel) == "HUDMenu")
+            if(getQualifiedClassName(this.topLevel) == TITLE_HUDMENU)
             {
                this.isHudMenu = true;
             }
             else if(this.topLevel.numChildren > 0)
             {
-               if(getQualifiedClassName(this.topLevel.getChildAt(0)) == "OverlayMenu")
+               if(getQualifiedClassName(this.topLevel.getChildAt(0)) == TITLE_OVERLAY)
                {
                   this.topLevel = this.topLevel.getChildAt(0);
                   this.isHudMenu = false;
