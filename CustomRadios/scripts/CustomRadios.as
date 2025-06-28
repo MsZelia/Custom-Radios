@@ -102,7 +102,7 @@ package
       
       private var isInMainMenu:Boolean = true;
       
-      private var lastHUDMode:String = "";
+      private var isServerHop:Boolean = false;
       
       private var nextSongUID:uint;
       
@@ -160,13 +160,14 @@ package
       
       private function updateIsMainMenu(event:FromClientDataEvent) : void
       {
+         var previouslyInMainMenu:Boolean = this.isInMainMenu;
          this.isInMainMenu = event.data && event.data.menuStackA && event.data.menuStackA.some(function(x:*):*
          {
             return x.menuName == MAIN_MENU;
          });
-         if(this.isInMainMenu)
+         if(this.isInMainMenu && !previouslyInMainMenu)
          {
-            this.lastHUDMode = this.HUDModeData.data.hudMode;
+            this.isServerHop = true;
          }
       }
       
@@ -681,11 +682,11 @@ package
          try
          {
             t1 = Number(getTimer());
-            if(this.isInMainMenu && this.lastHUDMode == "Loading")
+            if(this.isServerHop)
             {
                clearTimeout(nextSongUID);
-               this.lastHUDMode = "";
-               nextSongUID = setTimeout(nextSong,2000);
+               nextSongUID = setTimeout(nextSong,1000);
+               this.isServerHop = false;
             }
             isValidHM = this.isValidHUDMode();
             if(!this.isHudMenu && this.topLevel != null && this.topLevel.SocialMenu_mc != null)
