@@ -23,7 +23,7 @@ package
       
       public static const MOD_NAME:String = "CustomRadios";
       
-      public static const MOD_VERSION:String = "1.0.4";
+      public static const MOD_VERSION:String = "1.0.3";
       
       public static const FULL_MOD_NAME:String = MOD_NAME + " " + MOD_VERSION;
       
