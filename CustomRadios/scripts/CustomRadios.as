@@ -23,7 +23,7 @@ package
       
       public static const MOD_NAME:String = "CustomRadios";
       
-      public static const MOD_VERSION:String = "1.0.3";
+      public static const MOD_VERSION:String = "1.0.4";
       
       public static const FULL_MOD_NAME:String = MOD_NAME + " " + MOD_VERSION;
       
@@ -54,6 +54,18 @@ package
       private static const TITLE_OVERLAY:String = "OverlayMenu";
       
       private static const MAIN_MENU:String = "MainMenu";
+      
+      private static const HUDTOOLS_MENU_HIDE:String = MOD_NAME + "_HIDE";
+      
+      private static const HUDTOOLS_MENU_PLAY_PAUSE:String = MOD_NAME + "_PLAY_PAUSE";
+      
+      private static const HUDTOOLS_MENU_NEXT_SONG:String = MOD_NAME + "_NEXT_SONG";
+      
+      private static const HUDTOOLS_MENU_PREV_SONG:String = MOD_NAME + "_PREV_SONG";
+      
+      private static const HUDTOOLS_MENU_NEXT_RADIO:String = MOD_NAME + "_NEXT_RADIO";
+      
+      private static const HUDTOOLS_MENU_PREV_RADIO:String = MOD_NAME + "_PREV_RADIO";
        
       
       private var lastRenderTime:Number = 0;
@@ -108,6 +120,10 @@ package
       
       private var nextSongUID:uint;
       
+      private var hudTools:SharedHUDTools;
+      
+      private var forceHide:Boolean = false;
+      
       public function CustomRadios()
       {
          arrTextfields = [];
@@ -139,6 +155,8 @@ package
             if(getQualifiedClassName(this.topLevel) == TITLE_HUDMENU)
             {
                this.isHudMenu = true;
+               this.hudTools = new SharedHUDTools(MOD_NAME);
+               this.hudTools.RegisterMenu(this.onBuildMenu,this.onSelectMenu);
             }
             else if(this.topLevel.numChildren > 0)
             {
@@ -157,6 +175,67 @@ package
          {
             trace(MOD_NAME + " not added to stage: " + getQualifiedClassName(movieRoot));
             ShowHUDMessage("Not added to stage: " + getQualifiedClassName(movieRoot));
+         }
+      }
+      
+      public function onBuildMenu(parentItem:String = null) : *
+      {
+         try
+         {
+            if(parentItem == MOD_NAME)
+            {
+               this.hudTools.AddMenuItem(HUDTOOLS_MENU_PREV_RADIO,"Previous Radio",true,false,250);
+               this.hudTools.AddMenuItem(HUDTOOLS_MENU_NEXT_RADIO,"Next Radio",true,false,250);
+               this.hudTools.AddMenuItem(HUDTOOLS_MENU_PREV_SONG,"Previous Song",true,false,250);
+               this.hudTools.AddMenuItem(HUDTOOLS_MENU_NEXT_SONG,"Next Song",true,false,250);
+               this.hudTools.AddMenuItem(HUDTOOLS_MENU_PLAY_PAUSE,"Play/Stop",true,false,250);
+               this.hudTools.AddMenuItem(HUDTOOLS_MENU_HIDE,"Force Hide",true,false,250);
+            }
+         }
+         catch(e:Error)
+         {
+         }
+      }
+      
+      public function onSelectMenu(selectItem:String) : *
+      {
+         if(selectItem == HUDTOOLS_MENU_PLAY_PAUSE)
+         {
+            config.Play = !config.Play;
+            if(config.Play)
+            {
+               startRadio();
+            }
+         }
+         else if(selectItem == HUDTOOLS_MENU_NEXT_SONG)
+         {
+            skipSongs++;
+            queueNextSong();
+         }
+         else if(selectItem == HUDTOOLS_MENU_PREV_SONG)
+         {
+            skipSongs--;
+            queueNextSong();
+         }
+         else if(selectItem == HUDTOOLS_MENU_NEXT_RADIO)
+         {
+            config.PlayRadioId++;
+            if(config.PlayRadioId >= config.Radios.length)
+            {
+               config.PlayRadioId = 0;
+            }
+         }
+         else if(selectItem == HUDTOOLS_MENU_PREV_RADIO)
+         {
+            config.PlayRadioId--;
+            if(config.PlayRadioId < 0)
+            {
+               config.PlayRadioId = config.Radios.length - 1;
+            }
+         }
+         else if(selectItem == HUDTOOLS_MENU_HIDE)
+         {
+            this.forceHide = !this.forceHide;
          }
       }
       
@@ -690,7 +769,7 @@ package
                nextSongUID = setTimeout(nextSong,1000);
                this.isServerHop = false;
             }
-            isValidHM = this.isValidHUDMode();
+            isValidHM = !this.forceHide && this.isValidHUDMode();
             if(!this.isHudMenu && this.topLevel != null && this.topLevel.SocialMenu_mc != null)
             {
                vis = Boolean(this.topLevel.SocialMenu_mc.show);
