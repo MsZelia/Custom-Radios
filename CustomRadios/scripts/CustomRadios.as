@@ -129,10 +129,10 @@ package
          arrTextfields = [];
          radioButtons = [];
          super();
-         addEventListener(Event.ADDED_TO_STAGE,this.addedToStageHandler);
+         addEventListener(Event.ADDED_TO_STAGE,this.addedToStageHandler,false,0,true);
          this.HUDModeData = BSUIDataManager.GetDataFromClient("HUDModeData");
          this.configTimer = new Timer(CONFIG_RELOAD_TIME);
-         this.configTimer.addEventListener(TimerEvent.TIMER,this.loadConfig);
+         this.configTimer.addEventListener(TimerEvent.TIMER,this.loadConfig,false,0,true);
          this.configTimer.start();
       }
       
@@ -148,6 +148,8 @@ package
       
       public function addedToStageHandler(param1:Event) : *
       {
+         removeEventListener(Event.ADDED_TO_STAGE,this.addedToStageHandler);
+         addEventListener(Event.REMOVED_FROM_STAGE,this.removedFromStageHandler,false,0,true);
          var movieRoot:* = stage.getChildAt(0);
          if(Boolean(movieRoot))
          {
@@ -166,7 +168,7 @@ package
                   this.isHudMenu = false;
                   this.isInMainMenu = true;
                   BSUIDataManager.Subscribe("MenuStackData",this.updateIsMainMenu);
-                  stage.addEventListener(KeyboardEvent.KEY_DOWN,this.keyDownHandler);
+                  stage.addEventListener(KeyboardEvent.KEY_DOWN,this.keyDownHandler,false,0,true);
                }
             }
             trace(MOD_NAME + " added to stage: " + getQualifiedClassName(this.topLevel));
@@ -175,6 +177,27 @@ package
          {
             trace(MOD_NAME + " not added to stage: " + getQualifiedClassName(movieRoot));
             ShowHUDMessage("Not added to stage: " + getQualifiedClassName(movieRoot));
+         }
+      }
+      
+      public function removedFromStageHandler(param1:Event) : *
+      {
+         removeEventListener(Event.REMOVED_FROM_STAGE,this.removedFromStageHandler);
+         if(stage && stage.hasEventListener(KeyboardEvent.KEY_DOWN))
+         {
+            stage.removeEventListener(KeyboardEvent.KEY_DOWN,this.keyDownHandler);
+         }
+         if(this.configTimer)
+         {
+            this.configTimer.removeEventListener(TimerEvent.TIMER,this.loadConfig);
+         }
+         if(this.displayTimer)
+         {
+            this.displayTimer.removeEventListener(TimerEvent.TIMER,this.displayRadioWidget);
+         }
+         if(this.hudtools)
+         {
+            this.hudtools.Shutdown();
          }
       }
       
@@ -363,6 +386,7 @@ package
       public function loadConfig() : void
       {
          var loaderComplete:Function;
+         var ioErrorHandler:Function;
          var url:URLRequest = null;
          var loader:URLLoader = null;
          try
@@ -392,13 +416,18 @@ package
                }
                catch(e:Error)
                {
-                  ShowHUDMessage("Error loading config (" + CustomRadiosConfig.ERROR_CODE + "): " + e);
+                  ShowHUDMessage("Error parsing config (" + CustomRadiosConfig.ERROR_CODE + "): " + e);
                }
+            };
+            ioErrorHandler = function(param1:*):void
+            {
+               ShowHUDMessage("Error loading config: " + param1.text);
             };
             url = new URLRequest(CONFIG_FILE);
             loader = new URLLoader();
             loader.load(url);
-            loader.addEventListener(Event.COMPLETE,loaderComplete);
+            loader.addEventListener(Event.COMPLETE,loaderComplete,false,0,true);
+            loader.addEventListener(IOErrorEvent.IO_ERROR,ioErrorHandler,false,0,true);
          }
          catch(e:Error)
          {
@@ -422,7 +451,7 @@ package
             while(i < 5)
             {
                textfield = new TextField();
-               textfield.addEventListener(MouseEvent.CLICK,radioButtonClickHandler);
+               textfield.addEventListener(MouseEvent.CLICK,radioButtonClickHandler,false,0,true);
                TextFieldEx.setTextAutoSize(textfield,TextFieldEx.TEXTAUTOSZ_FIT);
                addChild(textfield);
                textformat = new TextFormat(config.textFont,16,config.textColor);
@@ -492,7 +521,7 @@ package
             this.displayTimer.removeEventListener(TimerEvent.TIMER,this.displayRadioWidget);
          }
          this.displayTimer = new Timer(config.refresh);
-         this.displayTimer.addEventListener(TimerEvent.TIMER,this.displayRadioWidget);
+         this.displayTimer.addEventListener(TimerEvent.TIMER,this.displayRadioWidget,false,0,true);
          this.displayTimer.start();
       }
       
