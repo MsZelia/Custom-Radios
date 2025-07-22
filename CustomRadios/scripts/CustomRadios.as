@@ -182,6 +182,7 @@ package
       
       public function removedFromStageHandler(param1:Event) : *
       {
+         clearTimeout(nextSongUID);
          removeEventListener(Event.REMOVED_FROM_STAGE,this.removedFromStageHandler);
          if(stage && stage.hasEventListener(KeyboardEvent.KEY_DOWN))
          {
@@ -527,7 +528,7 @@ package
       
       public function get isReloadable() : Boolean
       {
-         return true;
+         return false;
       }
       
       public function get config() : Object
