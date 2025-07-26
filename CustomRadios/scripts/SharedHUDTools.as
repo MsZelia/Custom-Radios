@@ -12,7 +12,7 @@ package
    public class SharedHUDTools
    {
       
-      private static const VERSION:String = "v1.1";
+      private static const VERSION:String = "v1.2";
       
       public static const PREFIX:String = String.fromCharCode(8192,8192);
       
@@ -44,12 +44,13 @@ package
       
       public static const MENU:String = "MENU";
       
+      public static const STARTMENU:String = "HUDMENU";
+      
       public static const STOPMENU:String = "XMENU";
       
       public static const FORMATMENU:String = "FMTMENU";
       
       public static const BUILDMENU:String = "BUILDMENU";
-       
       
       private var modName:String = "";
       
@@ -73,7 +74,7 @@ package
       
       private var queueTimer:Timer;
       
-      private var queueArray:Array;
+      private var queueArray:Array = new Array();
       
       private var queueFlag:Boolean = true;
       
@@ -83,7 +84,6 @@ package
       
       public function SharedHUDTools(modname:String, hudmode:String = "")
       {
-         this.queueArray = new Array();
          var date:Date = new Date();
          if(hudmode == "")
          {
@@ -469,6 +469,14 @@ package
                                     isActive = false;
                                  }
                               }
+                              else if(msgArray[3] == STARTMENU)
+                              {
+                                 isActive = true;
+                              }
+                              else if(msgArray[3] == STOPMENU)
+                              {
+                                 isActive = false;
+                              }
                               else if(msgArray[3] == BUILDMENU)
                               {
                                  if(buildMenuFunction != null)
@@ -549,3 +557,4 @@ package
       }
    }
 }
+

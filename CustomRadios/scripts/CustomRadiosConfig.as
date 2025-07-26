@@ -5,16 +5,15 @@ package
    public class CustomRadiosConfig
    {
       
+      private static var _config:Object;
+      
       public static const STATE_HIDDEN:String = "hidden";
       
       public static const STATE_SHOWN:String = "shown";
       
       public static const BUTTON_ACTIONS:Array = ["prevSong","playStop","nextSong","prevRadio","nextRadio"];
       
-      private static var _config:Object;
-      
       public static var ERROR_CODE:String = "";
-       
       
       public function CustomRadiosConfig()
       {
@@ -140,3 +139,4 @@ package
       }
    }
 }
+

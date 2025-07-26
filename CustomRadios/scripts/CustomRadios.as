@@ -23,7 +23,7 @@ package
       
       public static const MOD_NAME:String = "CustomRadios";
       
-      public static const MOD_VERSION:String = "1.0.3";
+      public static const MOD_VERSION:String = "1.0.4";
       
       public static const FULL_MOD_NAME:String = MOD_NAME + " " + MOD_VERSION;
       
@@ -66,7 +66,6 @@ package
       private static const HUDTOOLS_MENU_NEXT_RADIO:String = MOD_NAME + "_NEXT_RADIO";
       
       private static const HUDTOOLS_MENU_PREV_RADIO:String = MOD_NAME + "_PREV_RADIO";
-       
       
       private var lastRenderTime:Number = 0;
       
@@ -88,7 +87,7 @@ package
       
       private var HUDModeData:*;
       
-      private var arrTextfields:Array;
+      private var arrTextfields:Array = [];
       
       private var textfield_index:int = 0;
       
@@ -108,7 +107,7 @@ package
       
       private var nextSongId:int = -1;
       
-      private var radioButtons:Array;
+      private var radioButtons:Array = [];
       
       private const buttonActions:Array = CustomRadiosConfig.BUTTON_ACTIONS;
       
@@ -126,14 +125,9 @@ package
       
       public function CustomRadios()
       {
-         arrTextfields = [];
-         radioButtons = [];
          super();
          addEventListener(Event.ADDED_TO_STAGE,this.addedToStageHandler,false,0,true);
          this.HUDModeData = BSUIDataManager.GetDataFromClient("HUDModeData");
-         this.configTimer = new Timer(CONFIG_RELOAD_TIME);
-         this.configTimer.addEventListener(TimerEvent.TIMER,this.loadConfig,false,0,true);
-         this.configTimer.start();
       }
       
       public static function toString(param1:Object) : String
@@ -171,6 +165,8 @@ package
                   stage.addEventListener(KeyboardEvent.KEY_DOWN,this.keyDownHandler,false,0,true);
                }
             }
+            this.initConfigTimer();
+            this.loadConfig();
             trace(MOD_NAME + " added to stage: " + getQualifiedClassName(this.topLevel));
          }
          else
@@ -183,6 +179,7 @@ package
       public function removedFromStageHandler(param1:Event) : *
       {
          clearTimeout(nextSongUID);
+         BSUIDataManager.Unsubscribe("MenuStackData",this.updateIsMainMenu);
          removeEventListener(Event.REMOVED_FROM_STAGE,this.removedFromStageHandler);
          if(stage && stage.hasEventListener(KeyboardEvent.KEY_DOWN))
          {
@@ -200,6 +197,13 @@ package
          {
             this.hudtools.Shutdown();
          }
+      }
+      
+      public function initConfigTimer() : void
+      {
+         this.configTimer = new Timer(CONFIG_RELOAD_TIME);
+         this.configTimer.addEventListener(TimerEvent.TIMER,this.loadConfig,false,0,true);
+         this.configTimer.start();
       }
       
       public function onBuildMenu(parentItem:String = null) : *
@@ -223,56 +227,69 @@ package
       
       public function onSelectMenu(selectItem:String) : *
       {
-         if(selectItem == HUDTOOLS_MENU_PLAY_PAUSE)
+         try
          {
-            config.Play = !config.Play;
-            if(config.Play)
+            if(selectItem == HUDTOOLS_MENU_PLAY_PAUSE)
             {
-               startRadio();
+               config.Play = !config.Play;
+               if(config.Play)
+               {
+                  startRadio();
+               }
+            }
+            else if(selectItem == HUDTOOLS_MENU_NEXT_SONG)
+            {
+               ++skipSongs;
+               queueNextSong();
+            }
+            else if(selectItem == HUDTOOLS_MENU_PREV_SONG)
+            {
+               --skipSongs;
+               queueNextSong();
+            }
+            else if(selectItem == HUDTOOLS_MENU_NEXT_RADIO)
+            {
+               config.PlayRadioId++;
+               if(config.PlayRadioId >= config.Radios.length)
+               {
+                  config.PlayRadioId = 0;
+               }
+            }
+            else if(selectItem == HUDTOOLS_MENU_PREV_RADIO)
+            {
+               config.PlayRadioId--;
+               if(config.PlayRadioId < 0)
+               {
+                  config.PlayRadioId = config.Radios.length - 1;
+               }
+            }
+            else if(selectItem == HUDTOOLS_MENU_HIDE)
+            {
+               this.forceHide = !this.forceHide;
             }
          }
-         else if(selectItem == HUDTOOLS_MENU_NEXT_SONG)
+         catch(e:Error)
          {
-            skipSongs++;
-            queueNextSong();
-         }
-         else if(selectItem == HUDTOOLS_MENU_PREV_SONG)
-         {
-            skipSongs--;
-            queueNextSong();
-         }
-         else if(selectItem == HUDTOOLS_MENU_NEXT_RADIO)
-         {
-            config.PlayRadioId++;
-            if(config.PlayRadioId >= config.Radios.length)
-            {
-               config.PlayRadioId = 0;
-            }
-         }
-         else if(selectItem == HUDTOOLS_MENU_PREV_RADIO)
-         {
-            config.PlayRadioId--;
-            if(config.PlayRadioId < 0)
-            {
-               config.PlayRadioId = config.Radios.length - 1;
-            }
-         }
-         else if(selectItem == HUDTOOLS_MENU_HIDE)
-         {
-            this.forceHide = !this.forceHide;
          }
       }
       
       private function updateIsMainMenu(event:FromClientDataEvent) : void
       {
-         var previouslyInMainMenu:Boolean = this.isInMainMenu;
-         this.isInMainMenu = event.data && event.data.menuStackA && event.data.menuStackA.some(function(x:*):*
+         var previouslyInMainMenu:Boolean;
+         try
          {
-            return x.menuName == MAIN_MENU;
-         });
-         if(this.isInMainMenu && !previouslyInMainMenu)
+            previouslyInMainMenu = this.isInMainMenu;
+            this.isInMainMenu = Boolean(event) && Boolean(event.data) && Boolean(event.data.menuStackA) && Boolean(event.data.menuStackA.some(function(x:*):*
+            {
+               return x.menuName == MAIN_MENU;
+            }));
+            if(this.isInMainMenu && !previouslyInMainMenu)
+            {
+               this.isServerHop = true;
+            }
+         }
+         catch(e:Error)
          {
-            this.isServerHop = true;
          }
       }
       
@@ -314,12 +331,12 @@ package
             }
             if(event.keyCode == config.Hotkeys.prevSong)
             {
-               skipSongs--;
+               --skipSongs;
                queueNextSong();
             }
             if(event.keyCode == config.Hotkeys.nextSong)
             {
-               skipSongs++;
+               ++skipSongs;
                queueNextSong();
             }
          }
@@ -328,12 +345,13 @@ package
       private function radioButtonClickHandler(param1:MouseEvent) : *
       {
          var buttonId:Number = -1;
-         if((buttonId = Number(this.radioButtons.indexOf(param1.target))) != -1)
+         buttonId = Number(this.radioButtons.indexOf(param1.target));
+         if(buttonId != -1)
          {
             switch(buttonId)
             {
                case 0:
-                  skipSongs--;
+                  --skipSongs;
                   queueNextSong();
                   break;
                case 1:
@@ -341,7 +359,7 @@ package
                   startRadio();
                   break;
                case 2:
-                  skipSongs++;
+                  ++skipSongs;
                   queueNextSong();
                   break;
                case 3:
@@ -619,7 +637,7 @@ package
          applyConfig(arrTextfields[textfield_index]);
          arrTextfields[textfield_index].text = text;
          arrTextfields[textfield_index].height = dummy_tf.height * text.split("\n").length;
-         textfield_index++;
+         ++textfield_index;
       }
       
       public function drawBackground() : void
@@ -914,3 +932,4 @@ package
       }
    }
 }
+
