@@ -67,6 +67,8 @@ package
       
       private static const HUDTOOLS_MENU_PREV_RADIO:String = MOD_NAME + "_PREV_RADIO";
       
+      private static const HUDTOOLS_MENU_RELOAD_CONFIG:String = MOD_NAME + "_RELOAD_CONFIG";
+      
       private var lastRenderTime:Number = 0;
       
       private var topLevel:* = null;
@@ -212,6 +214,10 @@ package
          {
             if(parentItem == MOD_NAME)
             {
+               if(config && config.disableRealTimeEdit)
+               {
+                  this.hudTools.AddMenuItem(HUDTOOLS_MENU_RELOAD_CONFIG,"Reload Config",true,false,250);
+               }
                this.hudTools.AddMenuItem(HUDTOOLS_MENU_PREV_RADIO,"Previous Radio",true,false,250);
                this.hudTools.AddMenuItem(HUDTOOLS_MENU_NEXT_RADIO,"Next Radio",true,false,250);
                this.hudTools.AddMenuItem(HUDTOOLS_MENU_PREV_SONG,"Previous Song",true,false,250);
@@ -266,6 +272,11 @@ package
             else if(selectItem == HUDTOOLS_MENU_HIDE)
             {
                this.forceHide = !this.forceHide;
+            }
+            else if(selectItem == HUDTOOLS_MENU_RELOAD_CONFIG)
+            {
+               config.disableRealTimeEdit = false;
+               this.loadConfig();
             }
          }
          catch(e:Error)
