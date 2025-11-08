@@ -1,0 +1,576 @@
+{
+	// WIDGET SETTINGS
+	"x": 710,
+	"y": 10,
+	"anchor": "top", // Options: top, bottom
+	"ySpacing": -5,
+	"width": 500,
+	"textSize": 16,
+	/* Some of the working fonts:
+	"$76HandwrittenNeat_Font", "$76HandwrittenIlliterate", "$BerlinDemi", "$BRODY",
+	"$Brush_Script_Std", "$ChowderHead", "$ConsoleFont", "$DebugTextFont", "$DotMatrix_Font",
+	"$evaScript_Font", "$Futura_Bold", "$HandwrittenFont", "$KiddieCocktails", "$Leiascript_Font",
+	"$MAIN_Font", "$MAIN_Font_Bold", "$MAIN_Font_Light", "$NixieTube_Font", "$Portico_Font_Regular",
+	"$Slate_Mobile", "$Terminal_Font", "$Typewriter_Font" */
+	"textFont": "$Terminal_Font",
+	"textAlign": "center", // Options: left, center, right
+	"textColor": "0xffbbee",
+	"textColorError": "0xff0000",
+	"textShadow": true,
+	"background": false,
+	"backgroundColor": "0x111111",
+	/* alpha / backgroundAlpha:
+		0 = loads default value
+		0 < value < 1.0 = semi-transparent
+		1.0 = opaque
+	HUD Opacity in settings can be changed so value of "alpha" can go over 1.0 (does not apply to "backgroundAlpha") */
+	"alpha": 1.0,
+	"backgroundAlpha": 0.25,
+	/* Blend modes:
+	add, alpha, darken, difference, erase, hardlight, invert, layer,
+	lighten, multiply, normal, overlay, screen, shader, subtract
+	https://help.adobe.com/en_US/FlashPlatform/reference/actionscript/3/flash/display/BlendMode.html */
+	"blendMode": "normal",
+	"textBlendMode": "normal",
+	
+	"disableRealTimeEdit": false,
+	"refresh": 250,
+	
+	/* HUD Modes:
+	"ActivateTypeMode", "All", "AutoVanity", "CampPlacement", "ContainerMode", "CrosshairAndActivateOnly",
+	"DeathRespawnMode", "DefaultScopeMenu", "DialogueMode", "EndOfMatch", "FurnitureEnterExit", "InsideMemory",
+	"InspectMode", "IronSights", "LegendaryPerksMode", "LockpickingMode", "MapMenu", "MessageMode",
+	"MovementDisabled", "NoHud", "PauseMode", "PerksMode", "Pipboy", "PowerArmor", "RadialMenu", "ScopeMenu",
+	"SelfieMode", "SitWaitMode", "SpectatorMode", "TerminalMode", "VATS", "VATSPlayback", "VertibirdMode",
+	"WorkshopMode"
+	"Fishing"
+	Overlay only: "Loading"
+	
+	"All" is default HUD mode (non-power armor), not all of them
+	
+	To hide widget completely and have only radio playing in background set these values below:
+		"HUDModesState": "shown",
+		"HUDModes": [],
+	*/
+	"HUDModesState": "shown", // Options: hidden, shown
+	"HUDModes": [
+		"All",
+		"PowerArmor"
+	],
+	
+	"debug": false,
+	"debugKeys": false,
+	
+	
+	// OVERLAY SETTINGS
+	"Buttons": {
+		"x": 765,
+		"y": 140,
+		"width": 390,
+		"height": 60
+	},
+	
+	"ButtonNames": [
+		"{hotkey}) Prev Song",
+		"{hotkey}) Play/Stop",
+		"Next Song ({hotkey}",
+		"{hotkey}) Prev Radio   <<",
+		">>   Next Radio ({hotkey}"
+	],
+	
+	"Hotkeys": {
+		"prevRadio": 112, // F1
+		"nextRadio": 113, // F2
+		"prevSong": 114, // F3
+		"nextSong": 115, // F4
+		"playStop": 116 // F5
+	},
+	
+	
+	
+	// RADIO SETTINGS
+	"Format": "{radioName} [{trackId}/{numberOfTracks}]\n{trackName}\n{elapsedDuration}/{trackDuration}\n\nNext up: {nextTrackName}",
+	"FormatRadioOff": "Radio off!",
+	"FormatRadioTurningOff": "Radio turning off...",
+	"FormatRadioSwitching": "Switching to... {nextRadioName}",
+	"FormatRadioNoPlaylist": "Selected Radio has no tracks!",
+	"FormatRadioNotExist": "Selected RadioId doesn't exist!",
+	
+	
+	"Play": false,
+	"PlayRadioId": 0,
+	"StartTrackId": "RANDOM", // Options: Number of track or "RANDOM"
+	
+	
+	"Radios": [
+	{ // Radio 0
+		"name": "Appalachia Radio // NO ADS",
+		"order": "RANDOM", // Options: ORDERED, RANDOM
+		"playlist": [
+		{ //0
+			"name": "Andrews Sisters - Straighten Up And Fly Right",
+			"id": "MUSRadio76GeneralAndrewsSistersStraightenUpAndFlyRight",
+			"duration": 145
+		},
+		{
+			"name": "Beach Boys - Wouldnt It Be Nice",
+			"id": "MUSRadio76GeneralBeachBoysWouldntItBeNice",
+			"duration": 151
+		},
+		{
+			"name": "Ben Selvin - Happy Days Are Here Again",
+			"id": "MUSRadio76GeneralBenSelvinHappyDaysAreHereAgain",
+			"duration": 197
+		},
+		{
+			"name": "Billie Holiday - Crazy He Calls Me",
+			"id": "MUSRadio76GeneralBillieHolidayCrazyHeCallsMe",
+			"duration": 185
+		},
+		{
+			"name": "Bing Crosby Andrews Sisters - Dont Fence Me In",
+			"id": "MUSRadio76GeneralBingCrosbyAndrewsSistersDontFenceMeIn",
+			"duration": 182
+		},
+		{ //5
+			"name": "Bing Crosby Andrews Sisters - Pistol Packin Mama",
+			"id": "MUSRadio76GeneralBingCrosbyAndrewsSistersPistolPackinMama",
+			"duration": 181
+		},
+		{
+			"name": "Blind Willie Johnson - Nobodys Fault But Mine",
+			"id": "MUSRadio76GeneralBlindWillieJohnsonNobodysFaultButMine",
+			"duration": 189
+		},
+		{
+			"name": "Bob Crosby - Dear Hearts And Gentle People",
+			"id": "MUSRadio76GeneralBobCrosbyDearHeartsAndGentlePeople",
+			"duration": 129
+		},
+		{
+			"name": "Bob Wills - Bubbles In My Beers",
+			"id": "MUSRadio76GeneralBobWillsBubblesInMyBeers",
+			"duration": 136
+		},
+		{
+			"name": "Bob Wills - Steel Guitar Rag",
+			"id": "MUSRadio76GeneralBobWillsSteelGuitarRag",
+			"duration": 152
+		},
+		{ //10
+			"name": "Cass Daley - A Good Man Is Hard To Find",
+			"id": "MUSRadio76GeneralCassDaleyAGoodManIsHardToFind",
+			"duration": 157
+		},
+		{
+			"name": "Chick Webb - I Cant Dance I Got Ants In My Pants",
+			"id": "MUSRadio76GeneralChickWebbICantDanceIGotAntsInMyPants",
+			"duration": 177
+		},
+		{
+			"name": "Chick Webb - Midnite In A Madhouse",
+			"id": "MUSRadio76GeneralChickWebbMidniteInAMadhouse",
+			"duration": 149
+		},
+		{
+			"name": "Chick Webb - When I Get Low I Get High",
+			"id": "MUSRadio76GeneralChickWebbWhenIGetLowIGetHigh",
+			"duration": 143
+		},
+		{
+			"name": "Chordettes - Mr Sandman",
+			"id": "MUSRadio76GeneralChordettesMrSandman",
+			"duration": 140
+		},
+		{ //15
+			"name": "Cole Porter - Anything Goes",
+			"id": "MUSRadio76GeneralColePorterAnythingGoes",
+			"duration": 189
+		},
+		{
+			"name": "Commodores - Uranium",
+			"id": "MUSRadio76GeneralCommodoresUranium",
+			"duration": 133
+		},
+		{
+			"name": "CoPilot - Country Roads",
+			"id": "MUSRadio76GeneralCoPilotCountryRoads",
+			"duration": 179
+		},
+		{
+			"name": "CoPilot - The Ring Of Fire",
+			"id": "MUSRadio76GeneralCoPilotTheRingOfFire",
+			"duration": 176
+		},
+		{
+			"name": "Count Basie - Jumpin At The Woodside",
+			"id": "MUSRadio76GeneralCountBasieJumpinAtTheWoodside",
+			"duration": 188
+		},
+		{ //20
+			"name": "Danny Kaye Andrews Sisters - Civilization",
+			"id": "MUSRadio76GeneralDannyKayeAndrewsSistersCivilization",
+			"duration": 182
+		},
+		{
+			"name": "Eddy Duchin - Ol Man Mose",
+			"id": "MUSRadio76GeneralEddyDuchinOlManMose",
+			"duration": 146
+		},
+		{
+			"name": "Ernest Tubb - Walking The Floor Over You",
+			"id": "MUSRadio76GeneralErnestTubbWalkingTheFloorOverYou",
+			"duration": 124
+		},
+		{
+			"name": "Fats Waller - Aint Misbehavin",
+			"id": "MUSRadio76GeneralFatsWallerAintMisbehavin",
+			"duration": 238
+		},
+		{
+			"name": "Five Stars - Atom Bomb Baby",
+			"id": "MUSRadio76GeneralFiveStarsAtomBombBaby",
+			"duration": 136
+		},
+		{ //25
+			"name": "Freddie Slack And His Orchestra - Mister Five By Five",
+			"id": "MUSRadio76GeneralFreddieSlackAndHisOrchestraMisterFiveByFive",
+			"duration": 183
+		},
+		{
+			"name": "Freddie Slack And His Orchestra - Pig Foot Pete",
+			"id": "MUSRadio76GeneralFreddieSlackAndHisOrchestraPigFootPete",
+			"duration": 174
+		},
+		{
+			"name": "Freddie Slack And His Orchestra - Two Left Hands",
+			"id": "MUSRadio76GeneralFreddieSlackAndHisOrchestraTwoLeftHands",
+			"duration": 180
+		},
+		{
+			"name": "Glenn Miller - Juke Box Saturday Night",
+			"id": "MUSRadio76GeneralGlennMillerJukeBoxSaturdayNight",
+			"duration": 184
+		},
+		{
+			"name": "Henry King Orchestra - Just A Fair Weather Friend",
+			"id": "MUSRadio76GeneralHenryKingOrchestraJustAFairWeatherFriend",
+			"duration": 185
+		},
+		{ //30
+			"name": "Ink Spots - I Dont Want To Set The World On Fire",
+			"id": "MUSRadio76GeneralInkSpotsIDontWantToSetTheWorldOnFire",
+			"duration": 186
+		},
+		{
+			"name": "Ink Spots - Its All Over But The Crying",
+			"id": "MUSRadio76GeneralInkSpotsItsAllOverButTheCrying",
+			"duration": 167
+		},
+		{
+			"name": "Ink Spots - Maybe",
+			"id": "MUSRadio76GeneralInkSpotsMaybe",
+			"duration": 185
+		},
+		{
+			"name": "Ink Spots - We Three",
+			"id": "MUSRadio76GeneralInkSpotsWeThree",
+			"duration": 200
+		},
+		{
+			"name": "Isham Jones - Doin The Uptown Lowdown",
+			"id": "MUSRadio76GeneralIshamJonesDoinTheUptownLowdown",
+			"duration": 159
+		},
+		{ //35
+			"name": "Jerry Irby - Answer To Drivin Nails In My Coffin",
+			"id": "MUSRadio76GeneralJerryIrbyAnswerToDrivinNailsInMyCoffin",
+			"duration": 166
+		},
+		{
+			"name": "Johnny Bond - Headin Down The Wrong Highway",
+			"id": "MUSRadio76GeneralJohnnyBondHeadinDownTheWrongHighway",
+			"duration": 95
+		},
+		{
+			"name": "Johnny Long - In A Shanty In Old Shanty Town",
+			"id": "MUSRadio76GeneralJohnnyLongInAShantyInOldShantyTown",
+			"duration": 173
+		},
+		{
+			"name": "Kay Kyser Orchestra - Praise The Lord And Pass The Ammunition",
+			"id": "MUSRadio76GeneralKayKyserOrchestraPraiseTheLordAndPassTheAmmunition",
+			"duration": 152
+		},
+		{
+			"name": "Louis Jordan - Salt Pork West Virginia",
+			"id": "MUSRadio76GeneralLouisJordanSaltPorkWestVirginia",
+			"duration": 177
+		},
+		{ //40
+			"name": "Milton Brown - Keep Knocking But You Cant Come In",
+			"id": "MUSRadio76GeneralMiltonBrownKeepKnockingButYouCantComeIn",
+			"duration": 153
+		},
+		{
+			"name": "Nat King Cole - Orange Colored Sky",
+			"id": "MUSRadio76GeneralNatKingColeOrangeColoredSky",
+			"duration": 152
+		},
+		{
+			"name": "Patsy Montana - I Didnt Know The Gun Was Loaded",
+			"id": "MUSRadio76GeneralPatsyMontanaIDidntKnowTheGunWasLoaded",
+			"duration": 158
+		},
+		{
+			"name": "Roy Brown - Butcher Pete Part 1",
+			"id": "MUSRadio76GeneralRoyBrownButcherPetePart1",
+			"duration": 148
+		},
+		{
+			"name": "Sons Of The Pioneers - Riders In The Sky",
+			"id": "MUSRadio76GeneralSonsOfThePioneersRidersInTheSky",
+			"duration": 141
+		},
+		{ //45
+			"name": "Tennesee Ernie Ford - Dark As A Dungeon",
+			"id": "MUSRadio76GeneralTenneseeErnieFordDarkAsADungeon",
+			"duration": 168
+		},
+		{
+			"name": "Tennesee Ernie Ford - Shenandoah",
+			"id": "MUSRadio76GeneralTenneseeErnieFordShenandoah",
+			"duration": 158
+		},
+		{
+			"name": "Tennesee Ernie Ford - Sixteen Tons",
+			"id": "MUSRadio76GeneralTenneseeErnieFordSixteenTons",
+			"duration": 155
+		},
+		{
+			"name": "Tommy Dorsey - Opus No1",
+			"id": "MUSRadio76GeneralTommyDorseyOpusNo1",
+			"duration": 173
+		}
+		]
+	},
+	{ // Radio 1
+		"name": "Diamond City Radio",
+		"order": "RANDOM", // Options: ORDERED, RANDOM
+		"playlist": [
+		{ //0
+			"name": "Lynda Carter - Baby Its You",
+			"id": "MUSLyndaCarterBabyItsYou",
+			"duration": 150
+		},
+		{
+			"name": "Lynda Carter - Goodneighbor",
+			"id": "MUSLyndaCarterGoodneighbor",
+			"duration": 214
+		},
+		{
+			"name": "Lynda Carter - Im The One",
+			"id": "MUSLyndaCarterImTheOne",
+			"duration": 203
+		},
+		{
+			"name": "Lynda Carter - Man Enough",
+			"id": "MUSLyndaCarterManEnough",
+			"duration": 200
+		},
+		{
+			"name": "Lynda Carter - Train Train",
+			"id": "MUSLyndaCarterTrainTrain",
+			"duration": 132
+		},
+		{ //5
+			"name": "Betty Hutton - Hes A Demon",
+			"id": "MUSRadioPirateSong_01",
+			"duration": 193
+		},
+		{
+			"name": "Betty Hutton - Its A Man",
+			"id": "MUSRadioPirateSong_02",
+			"duration": 143
+		},
+		{
+			"name": "Big Maybelle - Whole Lotta Shakin Goin On",
+			"id": "MUSRadioPirateSong_03",
+			"duration": 164
+		},
+		{
+			"name": "Billie Holiday - Crazy He Calls Me",
+			"id": "MUSRadio76GeneralBillieHolidayCrazyHeCallsMe",
+			"duration": 182
+		},
+		{
+			"name": "Billie Holiday - Easy Living",
+			"id": "MUSRadioPirateSong_04",
+			"duration": 181
+		},
+		{ //10
+			"name": "Billy Ward And The Dominoes - Sixty Minute Man",
+			"id": "MUSRadioPirateSong_05",
+			"duration": 146
+		},
+		{
+			"name": "Bing Crosby - Accentuate The Positive",
+			"id": "MUSRadioPirateSong_06",
+			"duration": 68
+		},
+		{
+			"name": "Bing Crosby Andrews Sisters - Pistol Packin Mama",
+			"id": "MUSRadio76GeneralBingCrosbyAndrewsSistersPistolPackinMama",
+			"duration": 181
+		},
+		{
+			"name": "Bob Crosby - Dear Hearts And Gentle People",
+			"id": "MUSRadio76GeneralBobCrosbyDearHeartsAndGentlePeople",
+			"duration": 129
+		},
+		{
+			"name": "Bob Crosby - Happy Times",
+			"id": "MUSRadioPirateSong_07",
+			"duration": 161
+		},
+		{ //15
+			"name": "Bob Crosby - Way Back Home",
+			"id": "MUSRadioPirateSong_08",
+			"duration": 170
+		},
+		{
+			"name": "Cole Porter - Anything Goes",
+			"id": "MUSRadio76GeneralColePorterAnythingGoes",
+			"duration": 189
+		},
+		{
+			"name": "Connie Allen - Rocket 69",
+			"id": "MUSRadioPirateSong_09",
+			"duration": 161
+		},
+		{
+			"name": "Danny Kaye Andrews Sisters - Civilization",
+			"id": "MUSRadio76GeneralDannyKayeAndrewsSistersCivilization",
+			"duration": 182
+		},
+		{
+			"name": "Dion - TheWanderer",
+			"id": "MUSRadioPirateSong_11",
+			"duration": 170
+		},
+		{ //20
+			"name": "Ella Fitzgerald - Into Each Life",
+			"id": "MUSRadioPirateSong_12",
+			"duration": 186
+		},
+		{
+			"name": "Ella Fitzgerald - Undecided",
+			"id": "MUSRadioPirateSong_13",
+			"duration": 187
+		},
+		{
+			"name": "Elton Britt - Uranium Fever",
+			"id": "MUSRadioPirateSong_14",
+			"duration": 138
+		},
+		{
+			"name": "Frankie Carle - One More Tomorrow",
+			"id": "MUSRadioPirateSong_15",
+			"duration": 197
+		},
+		{
+			"name": "Johnny Mercer - Personality",
+			"id": "MUSRadioPirateSong_16",
+			"duration": 166
+		},
+		{ //25
+			"name": "Louis Jordan - Keep A Knockin",
+			"id": "MUSRadioPirateSong_17",
+			"duration": 149
+		},
+		{
+			"name": "Nat King Cole - Orange Colored Sky",
+			"id": "MUSRadio76GeneralNatKingColeOrangeColoredSky",
+			"duration": 152
+		},
+		{
+			"name": "Ray Smith - Right Behind You Baby",
+			"id": "MUSRadioPirateSong_18",
+			"duration": 143
+		},
+		{
+			"name": "Roy Brown - Butcher Pete Part 1",
+			"id": "MUSRadio76GeneralRoyBrownButcherPetePart1",
+			"duration": 148
+		},
+		{
+			"name": "Roy Brown - Butcher Pete Part 2",
+			"id": "MUSRadioPirateSong_19",
+			"duration": 161
+		},
+		{ //30
+			"name": "Roy Brown - Good Rockin Tonight",
+			"id": "MUSRadioPirateSong_20",
+			"duration": 175
+		},
+		{
+			"name": "Roy Brown - Mighty Mighty Man",
+			"id": "MUSRadioPirateSong_21",
+			"duration": 153
+		},
+		{
+			"name": "Sheldon Allman - Crawl Out Through The Fallout",
+			"id": "MUSRadioPirateSong_23",
+			"duration": 142
+		},
+		{
+			"name": "Skeeter Davis - The End Of The World",
+			"id": "MUSRadioPirateSong_24",
+			"duration": 156
+		},
+		{
+			"name": "Tex Beneke - A Wonderful Guy",
+			"id": "MUSRadioPirateSong_26",
+			"duration": 112
+		},
+		{ //35
+			"name": "The Five Stars - Atom Bomb Baby",
+			"id": "MUSRadioPirateSong_27",
+			"duration": 136
+		},
+		{
+			"name": "Ink Spots - I Dont Want To Set The World On Fire",
+			"id": "MUSRadio76GeneralInkSpotsIDontWantToSetTheWorldOnFire",
+			"duration": 186
+		},
+		{
+			"name": "Ink Spots - Its All Over But The Crying",
+			"id": "MUSRadio76GeneralInkSpotsItsAllOverButTheCrying",
+			"duration": 167
+		},
+		{
+			"name": "Ink Spots - Maybe",
+			"id": "MUSRadio76GeneralInkSpotsMaybe",
+			"duration": 185
+		},
+		{
+			"name": "The Three Suns - Worry Worry Worry",
+			"id": "MUSRadioPirateSong_28",
+			"duration": 150
+		},
+		{ //40
+			"name": "Warren Smith - Uranium Rock",
+			"id": "MUSRadioPirateSong_29",
+			"duration": 125
+		},
+		{
+			"name": "Wynonie Harris - Grandma Plays The Numbers",
+			"id": "MUSRadioPirateSong_30",
+			"duration": 157
+		}
+		]
+	}
+	// Additional radios go here after comma sign
+	
+	]
+}
