@@ -79,11 +79,11 @@
 	],
 	
 	"Hotkeys": {
-		"prevRadio": 112, // F1
-		"nextRadio": 113, // F2
-		"prevSong": 114, // F3
-		"nextSong": 115, // F4
-		"playStop": 116 // F5
+		"prevRadio": "F1",
+		"nextRadio": "F2",
+		"prevSong": "F3",
+		"nextSong": "F4",
+		"playStop": "F5"
 	},
 	
 	
