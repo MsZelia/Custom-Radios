@@ -1,6 +1,6 @@
 package
 {
-   import utils.Parser;
+   import utils.*;
    
    public class CustomRadiosConfig
    {
@@ -96,7 +96,7 @@ package
             var action:String = null;
             for each(action in BUTTON_ACTIONS)
             {
-               config.Hotkeys[action] = Parser.parsePositiveNumber(config.Hotkeys[action],0);
+               config.Hotkeys[action] = Buttons.parseValue(config.Hotkeys[action]);
             }
          }
          ERROR_CODE = "HUDModesState";

@@ -23,7 +23,7 @@ package
       
       public static const MOD_NAME:String = "CustomRadios";
       
-      public static const MOD_VERSION:String = "1.0.4";
+      public static const MOD_VERSION:String = "1.0.5";
       
       public static const FULL_MOD_NAME:String = MOD_NAME + " " + MOD_VERSION;
       
@@ -125,6 +125,8 @@ package
       
       private var forceHide:Boolean = false;
       
+      private var isKeyDownDetected:Object = {};
+      
       public function CustomRadios()
       {
          super();
@@ -165,6 +167,7 @@ package
                   this.isInMainMenu = true;
                   BSUIDataManager.Subscribe("MenuStackData",this.updateIsMainMenu);
                   stage.addEventListener(KeyboardEvent.KEY_DOWN,this.keyDownHandler,false,0,true);
+                  stage.addEventListener(KeyboardEvent.KEY_UP,this.keyUpHandler,false,0,true);
                }
             }
             this.initConfigTimer();
@@ -186,6 +189,7 @@ package
          if(stage && stage.hasEventListener(KeyboardEvent.KEY_DOWN))
          {
             stage.removeEventListener(KeyboardEvent.KEY_DOWN,this.keyDownHandler);
+            stage.removeEventListener(KeyboardEvent.KEY_UP,this.keyUpHandler);
          }
          if(this.configTimer)
          {
@@ -306,14 +310,50 @@ package
       
       public function keyDownHandler(event:Event) : void
       {
-         if(!config)
+         try
          {
-            return;
+            this.isKeyDownDetected[event.keyCode] = true;
+            if(!config)
+            {
+               return;
+            }
+            if(config.debugKeys)
+            {
+               displayMessage("keyDown: " + event.keyCode + " - " + Buttons.getButtonKey(event.keyCode));
+            }
+            this.handleKey(event);
          }
-         if(config.debugKeys)
+         catch(e:Error)
          {
-            displayMessage("keyDown: " + event.keyCode);
+            displayMessage("Error keyDownHandler: " + e);
          }
+      }
+      
+      public function keyUpHandler(event:Event) : void
+      {
+         try
+         {
+            if(!config)
+            {
+               return;
+            }
+            if(config.debugKeys)
+            {
+               displayMessage("keyUp (kd:" + Boolean(this.isKeyDownDetected[event.keyCode]) + "): " + event.keyCode + " - " + Buttons.getButtonKey(event.keyCode));
+            }
+            if(!this.isKeyDownDetected[event.keyCode])
+            {
+               this.handleKey(event);
+            }
+         }
+         catch(e:Error)
+         {
+            displayMessage("Error keyUpHandler: " + e);
+         }
+      }
+      
+      private function handleKey(event:Event) : void
+      {
          if(config.Hotkeys)
          {
             if(event.keyCode == config.Hotkeys.playStop)
